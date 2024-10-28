@@ -174,12 +174,17 @@ app.delete('/clientes/:idCliente',async (req:Request,res:Response)=>{
         
         const usuarioExiste = await connection('tbcliente')
         .where({'dfid_cliente':idCliente})
-        .delete()
         
-        if(!usuarioExiste){
+        
+        if(usuarioExiste.length === 0){
+            res.status(404);
             throw Error("user não encontrado");   
         }
         
+        await connection('tbcliente')
+        .where({'dfid_cliente':idCliente})
+        .delete()
+
         res.status(200).send('Cliente deletado com sucesso!')
 
     }catch(error:any){
