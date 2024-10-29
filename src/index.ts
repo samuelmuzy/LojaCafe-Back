@@ -1,8 +1,8 @@
 import express, { Request,Response } from 'express'
 import cors from 'cors'
 import connection from './connection'
-import {generateToken,getTokenData} from './Authenticator'
-import { v7 } from 'uuid';
+import {generateToken,getTokenData} from './middlewares/Authenticator'
+import v7 from './middlewares/uuaid';
 
 const app = express();
 
