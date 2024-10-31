@@ -23,11 +23,11 @@ app.get('/clientes',async (req:Request,res:Response)=>{
 })
 
 app.post('/clientes/login',async (req:Request,res:Response)=>{
-    const { email, nome } = req.body;
+    const { email, senha } = req.body;
 
     try{
 
-        if (!email || !nome) {
+        if (!email || !senha) {
             res.status(400)
             throw new Error("Campo faltando");
         }
@@ -35,7 +35,7 @@ app.post('/clientes/login',async (req:Request,res:Response)=>{
         const [usuario] = await connection('tbcliente')
         .where({
             'dfemail_cliente':email,
-            'dfnome_cliente':nome
+            'dfsenha_cliente':senha
         })
 
         if(!usuario){
@@ -83,7 +83,7 @@ app.get('/clientes/:id',async (req:Request,res:Response)=>{
 //alterar usuarios
 app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
     
-    const {nome,telefone,email} = req.body;
+    const {nome,telefone,email,senha} = req.body;
     const {idusuario} = req.params;
 
     const tokenData = getTokenData(req.headers.authorization!)
@@ -95,7 +95,7 @@ app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
             throw new Error("Token invalido")
         }
 
-        if(!nome && !telefone && !email){
+        if(!nome && !telefone && !email && !senha){
             res.status(402) 
             throw Error("Adicione um campo!");
         }
@@ -112,7 +112,8 @@ app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
         .update({
             'dfnome_cliente':nome,
             'dftelefone_cliente':telefone,
-            'dfemail_cliente':email
+            'dfemail_cliente':email,
+            'dfsenha_cliente':senha
         })
         .where({'dfid_cliente':idusuario})
 
@@ -126,12 +127,12 @@ app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
 })
 //cadastro de cliente
 app.post('/clientes',async (req:Request,res:Response)=>{
-    const {nome,telefone,email} = req.body;
+    const {nome,telefone,email,senha} = req.body;
 
     const id = v7(); // usar v7
     
     try{
-        if(!nome || !telefone || !email){
+        if(!nome || !telefone || !email || !senha){
             res.status(401);
             throw Error("Campo faltando")
         }
@@ -150,7 +151,8 @@ app.post('/clientes',async (req:Request,res:Response)=>{
             'dfid_cliente':id,
             'dfnome_cliente':nome,
             'dftelefone_cliente':telefone,
-            'dfemail_cliente':email
+            'dfemail_cliente':email,
+            'dfsenha_cliente':senha
         })
         
         res.status(201).send('Cliente cadastrado com sucesso!');
