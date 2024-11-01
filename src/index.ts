@@ -2,7 +2,8 @@ import express, { Request,Response } from 'express'
 import cors from 'cors'
 import connection from './connection'
 import {generateToken,getTokenData} from './middlewares/Authenticator'
-import v7 from './middlewares/uuaid';
+import { hashPassword,comparePassword } from './middlewares/hash'
+import v7 from './middlewares/uuid';
 
 const app = express();
 
@@ -21,10 +22,10 @@ app.get('/clientes',async (req:Request,res:Response)=>{
         res.send(message)
     }
 })
-
+//login
 app.post('/clientes/login',async (req:Request,res:Response)=>{
     const { email, senha } = req.body;
-
+    
     try{
 
         if (!email || !senha) {
@@ -35,12 +36,18 @@ app.post('/clientes/login',async (req:Request,res:Response)=>{
         const [usuario] = await connection('tbcliente')
         .where({
             'dfemail_cliente':email,
-            'dfsenha_cliente':senha
         })
+
+        const isMatch = await comparePassword(senha, usuario.dfsenha_cliente);
+
+        if(!isMatch){
+            res.status(401);
+            throw new Error("Senha inválida");
+        }
 
         if(!usuario){
             res.status(401)
-            throw new Error("credenciais invalidas")
+            throw new Error("Email inválido")
         }
         
         res.status(200).send({token: generateToken({ id: usuario.dfid_cliente }) })
@@ -81,10 +88,10 @@ app.get('/clientes/:id',async (req:Request,res:Response)=>{
     }
 })
 //alterar usuarios
-app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
+app.put('/clientes/:id',async (req:Request,res:Response)=>{
     
     const {nome,telefone,email,senha} = req.body;
-    const {idusuario} = req.params;
+    const {id} = req.params;
 
     const tokenData = getTokenData(req.headers.authorization!)
 
@@ -101,12 +108,16 @@ app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
         }
 
         const verificarUsuario = await connection('tbcliente')
-        .where({'dfid_cliente':idusuario})
+        .where({'dfid_cliente':id})
 
         if(verificarUsuario.length === 0){
             res.status(404);
             throw Error("Id não encontrado");
         }
+
+        /*if(tokenData.id != id && tokenData.role != admin){
+            ("Voce nao tem permissão para alterar do usuario")
+        }*/
 
         await connection('tbcliente')
         .update({
@@ -115,7 +126,7 @@ app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
             'dfemail_cliente':email,
             'dfsenha_cliente':senha
         })
-        .where({'dfid_cliente':idusuario})
+        .where({'dfid_cliente':id})
 
         res.status(200).send("Cadastro alterado com sucesso!");
 
@@ -128,6 +139,8 @@ app.put('/clientes/:idusuario',async (req:Request,res:Response)=>{
 //cadastro de cliente
 app.post('/clientes',async (req:Request,res:Response)=>{
     const {nome,telefone,email,senha} = req.body;
+
+    const hashedPassword = await hashPassword(senha);
 
     const id = v7(); // usar v7
     
@@ -152,7 +165,7 @@ app.post('/clientes',async (req:Request,res:Response)=>{
             'dfnome_cliente':nome,
             'dftelefone_cliente':telefone,
             'dfemail_cliente':email,
-            'dfsenha_cliente':senha
+            'dfsenha_cliente':hashedPassword
         })
         
         res.status(201).send('Cliente cadastrado com sucesso!');
@@ -194,6 +207,20 @@ app.delete('/clientes/:idCliente',async (req:Request,res:Response)=>{
         res.send(message)
     }
 })
+//Bebidas
+app.get('/bebidas',async (req:Request,res:Response)=>{
+    try{
+        const bebidas = await connection('tbcliente');
+
+        res.status(200).send(bebidas);
+
+    }catch(error:any){ 
+        const message = (error.sqlMessage || error.message)
+        res.send(message)
+    }
+})
+
+
 
 app.listen(3003, () => {
     console.log('Vamos Rodar');
