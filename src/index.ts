@@ -23,41 +23,39 @@ app.get('/clientes',async (req:Request,res:Response)=>{
     }
 })
 //login
-app.post('/clientes/login',async (req:Request,res:Response)=>{
+app.post('/clientes/login', async (req: Request, res: Response) => {
     const { email, senha } = req.body;
-    
-    try{
 
+    try {
         if (!email || !senha) {
-            res.status(400)
+            res.status(400);
             throw new Error("Campo faltando");
         }
 
         const [usuario] = await connection('tbcliente')
-        .where({
-            'dfemail_cliente':email,
-        })
+            .where({ 'dfemail_cliente': email });
+
+        if (!usuario) {
+            res.status(401);
+            throw new Error("Email inválido");
+        }
 
         const isMatch = await comparePassword(senha, usuario.dfsenha_cliente);
 
-        if(!isMatch){
+        if (!isMatch) {
             res.status(401);
             throw new Error("Senha inválida");
         }
 
-        if(!usuario){
-            res.status(401)
-            throw new Error("Email inválido")
-        }
-        
-        res.status(200).send({token: generateToken({ id: usuario.dfid_cliente }) })
+        const token = generateToken({ id: usuario.dfid_cliente });
+        res.status(200).send({ token });
 
-    }catch(error:any){
-        const message = (error.sqlMessage || error.message)
-        res.send(message)
+    } catch (error: any) {
+        const message = error.sqlMessage || error.message;
+        res.status(400).send(message);
     }
-    
-})
+});
+
 //cliente por nome
 app.get('/clientes',async (req:Request,res:Response)=>{
     const {nome} = req.query
@@ -150,7 +148,6 @@ app.post('/clientes',async (req:Request,res:Response)=>{
             throw Error("Campo faltando")
         }
 
-        //todo: verificar se email/cadastro já existe, se existe retornar tratamento
         const verificarEmail = await connection('tbcliente')
         .where({'dfemail_cliente':email})
 
