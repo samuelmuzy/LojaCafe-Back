@@ -10,17 +10,107 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-//endpoint clientes
+//cliente por nome
 app.get('/clientes',async (req:Request,res:Response)=>{
+    const {nome} = req.query
     try{
-        const clientes = await connection('tbcliente');
+        if(nome){
+            const clientes = await connection('tbcliente')
+            .where({'dfnome_cliente':nome})
 
-        res.status(200).send(clientes);
+            if(clientes.length === 0){
+                res.status(400)
+                throw new Error("Usuário não encontrado!")
+            }
 
-    }catch(error:any){ 
+            res.status(200).send(clientes);
+        }else{
+            const clientes = await connection('tbcliente');
+
+            res.status(200).send(clientes);
+        }
+        
+    }catch(error:any){
         const message = (error.sqlMessage || error.message)
         res.send(message)
     }
+})
+//pesquisar por id
+app.get('/clientes/buscar/:id',async (req:Request,res:Response)=>{
+    const {id} = req.params
+
+    try{
+       
+        const clientes = await connection('tbcliente')
+        .where({'dfid_cliente':id})
+
+        if(clientes.length === 0){
+            res.status(400)
+            throw new Error("Cliente não encontrado")
+        }
+
+        res.status(200).send(clientes);
+
+    }catch(error:any){
+        const message = (error.sqlMessage || error.message)
+        res.send(message)
+    }
+})
+//alterar usuarios
+app.put('/clientes/:id',async (req:Request,res:Response)=>{
+    
+    const {nome,telefone,email,senha} = req.body;
+    const {id} = req.params;
+
+    const tokenData = getTokenData(req.headers.authorization!)
+
+    try{
+        
+        if(!tokenData){
+            res.status(401)
+            throw new Error("Token invalido")
+        }
+
+        if(!nome && !telefone && !email && !senha){
+            res.status(402) 
+            throw Error("Adicione um campo!");
+        }
+        
+        if (typeof senha !== 'string') {
+            res.status(400);
+            throw new Error("A senha deve ser uma string.");
+        }
+
+        const hashed = await hashPassword(senha) ;
+
+        const verificarUsuario = await connection('tbcliente')
+        .where({'dfid_cliente':id})
+
+        if(verificarUsuario.length === 0){
+            res.status(404);
+            throw Error("Id não encontrado");
+        }
+
+        /*if(tokenData.id != id && tokenData.role != admin){
+            ("Voce nao tem permissão para alterar do usuario")
+        }*/
+
+        await connection('tbcliente')
+        .update({
+            'dfnome_cliente':nome,
+            'dftelefone_cliente':telefone,
+            'dfemail_cliente':email,
+            'dfsenha_cliente':hashed
+        })
+        .where({'dfid_cliente':id})
+
+        res.status(200).send("Cadastro alterado com sucesso!");
+
+    }catch(error:any){
+        const message = (error.sqlMessage || error.message)
+        res.send(message)
+    }
+
 })
 //login
 app.post('/clientes/login', async (req: Request, res: Response) => {
@@ -56,89 +146,9 @@ app.post('/clientes/login', async (req: Request, res: Response) => {
     }
 });
 
-//cliente por nome
-app.get('/clientes',async (req:Request,res:Response)=>{
-    const {nome} = req.query
-    try{
-        const clientes = await connection('tbcliente')
-        .where({'nome_cliente':nome})
-
-        res.status(200).send(clientes);
-
-    }catch(error:any){
-        const message = (error.sqlMessage || error.message)
-        res.send(message)
-    }
-})
-//pesquisar por id
-app.get('/clientes/:id',async (req:Request,res:Response)=>{
-    const {id} = req.params
-
-    try{
-        const clientes = await connection('tbcliente')
-        .where({'dfid_cliente':id})
-
-        res.status(200).send(clientes);
-
-    }catch(error:any){
-        const message = (error.sqlMessage || error.message)
-        res.send(message)
-    }
-})
-//alterar usuarios
-app.put('/clientes/:id',async (req:Request,res:Response)=>{
-    
-    const {nome,telefone,email,senha} = req.body;
-    const {id} = req.params;
-
-    const tokenData = getTokenData(req.headers.authorization!)
-
-    try{
-        
-        if(!tokenData){
-            res.status(401)
-            throw new Error("Token invalido")
-        }
-
-        if(!nome && !telefone && !email && !senha){
-            res.status(402) 
-            throw Error("Adicione um campo!");
-        }
-
-        const verificarUsuario = await connection('tbcliente')
-        .where({'dfid_cliente':id})
-
-        if(verificarUsuario.length === 0){
-            res.status(404);
-            throw Error("Id não encontrado");
-        }
-
-        /*if(tokenData.id != id && tokenData.role != admin){
-            ("Voce nao tem permissão para alterar do usuario")
-        }*/
-
-        await connection('tbcliente')
-        .update({
-            'dfnome_cliente':nome,
-            'dftelefone_cliente':telefone,
-            'dfemail_cliente':email,
-            'dfsenha_cliente':senha
-        })
-        .where({'dfid_cliente':id})
-
-        res.status(200).send("Cadastro alterado com sucesso!");
-
-    }catch(error:any){
-        const message = (error.sqlMessage || error.message)
-        res.send(message)
-    }
-
-})
 //cadastro de cliente
 app.post('/clientes',async (req:Request,res:Response)=>{
     const {nome,telefone,email,senha} = req.body;
-
-    const hashedPassword = await hashPassword(senha);
 
     const id = v7(); // usar v7
     
@@ -147,7 +157,13 @@ app.post('/clientes',async (req:Request,res:Response)=>{
             res.status(401);
             throw Error("Campo faltando")
         }
-
+        if (typeof senha !== 'string') {
+            res.status(400);
+            throw new Error("A senha deve ser uma string.");
+        }
+        
+        const hashedPassword = await hashPassword(senha);
+        
         const verificarEmail = await connection('tbcliente')
         .where({'dfemail_cliente':email})
 
@@ -217,9 +233,6 @@ app.get('/bebidas',async (req:Request,res:Response)=>{
     }
 })
 
-
-
 app.listen(3003, () => {
     console.log('Vamos Rodar');
-    
-})
+});
