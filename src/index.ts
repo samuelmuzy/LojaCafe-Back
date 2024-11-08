@@ -57,61 +57,72 @@ app.get('/clientes/buscar/:id',async (req:Request,res:Response)=>{
     }
 })
 //alterar usuarios
-app.put('/clientes/:id',async (req:Request,res:Response)=>{
-    
-    const {nome,telefone,email,senha} = req.body;
-    const {id} = req.params;
+// Alterar usuário
+app.put('/clientes/:id', async (req: Request, res: Response) => {
+    const { nome, telefone, email, senha } = req.body;
+    const { id } = req.params;
 
-    const tokenData = getTokenData(req.headers.authorization!)
+    const tokenData = getTokenData(req.headers.authorization!);
 
-    try{
-        
-        if(!tokenData){
-            res.status(401)
-            throw new Error("Token invalido")
+    try {
+        // Verifica token
+        if (!tokenData) {
+            res.status(401);
+            throw new Error("Token inválido");
         }
 
-        if(!nome && !telefone && !email && !senha){
-            res.status(402) 
-            throw Error("Adicione um campo!");
-        }
-        
-        if (typeof senha !== 'string') {
+        // Verifica se ao menos um campo foi fornecido
+        if (!nome && !telefone && !email && !senha) {
             res.status(400);
-            throw new Error("A senha deve ser uma string.");
+            throw new Error("Adicione ao menos um campo para alterar.");
         }
 
-        const hashed = await hashPassword(senha) ;
-
+        // Verifica se o usuário existe
         const verificarUsuario = await connection('tbcliente')
-        .where({'dfid_cliente':id})
+            .where({ 'dfid_cliente': id });
 
-        if(verificarUsuario.length === 0){
+        if (verificarUsuario.length === 0) {
             res.status(404);
-            throw Error("Id não encontrado");
+            throw new Error("Id não encontrado");
         }
 
-        /*if(tokenData.id != id && tokenData.role != admin){
-            ("Voce nao tem permissão para alterar do usuario")
-        }*/
+        const verificarEmail = await connection('tbcliente')
+        .where({'dfemail_cliente':email})
 
+        if (verificarEmail.length > 0) {
+            res.status(401)
+            throw Error("Email ja cadastrado");
+        }
+
+        // Prepara dados para atualização
+        const dadosAtualizacao: any = {};
+        
+        if (nome) dadosAtualizacao.dfnome_cliente = nome;
+        if (telefone) dadosAtualizacao.dftelefone_cliente = telefone;
+        if (email) dadosAtualizacao.dfemail_cliente = email;
+        
+        // Criptografa a senha se fornecida
+        if (senha) {
+            if (typeof senha !== 'string') {
+                res.status(400);
+                throw new Error("A senha deve ser uma string.");
+            }
+            dadosAtualizacao.dfsenha_cliente = await hashPassword(senha);
+        }
+
+        // Atualiza o usuário
         await connection('tbcliente')
-        .update({
-            'dfnome_cliente':nome,
-            'dftelefone_cliente':telefone,
-            'dfemail_cliente':email,
-            'dfsenha_cliente':hashed
-        })
-        .where({'dfid_cliente':id})
+            .update(dadosAtualizacao)
+            .where({ 'dfid_cliente': id });
 
         res.status(200).send("Cadastro alterado com sucesso!");
 
-    }catch(error:any){
-        const message = (error.sqlMessage || error.message)
-        res.send(message)
+    } catch (error: any) {
+        const message = error.sqlMessage || error.message;
+        res.status(400).send(message);
     }
+});
 
-})
 //login
 app.post('/clientes/login', async (req: Request, res: Response) => {
     const { email, senha } = req.body;
