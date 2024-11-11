@@ -4,6 +4,8 @@ import connection from './connection'
 import {generateToken,getTokenData} from './middlewares/Authenticator'
 import { hashPassword,comparePassword } from './middlewares/hash'
 import v7 from './middlewares/uuid';
+import { typeUsuario } from './middlewares/types/typeUsuario'
+import { userType } from './middlewares/types/roleUsuario'
 
 const app = express();
 
@@ -40,7 +42,7 @@ app.get('/clientes/buscar/:id',async (req:Request,res:Response)=>{
     const {id} = req.params
 
     try{
-       
+
         const clientes = await connection('tbcliente')
         .where({'dfid_cliente':id})
 
@@ -56,7 +58,7 @@ app.get('/clientes/buscar/:id',async (req:Request,res:Response)=>{
         res.send(message)
     }
 })
-//alterar usuarios
+
 // Alterar usuário
 app.put('/clientes/:id', async (req: Request, res: Response) => {
     const { nome, telefone, email, senha } = req.body;
@@ -148,7 +150,7 @@ app.post('/clientes/login', async (req: Request, res: Response) => {
             throw new Error("Senha inválida");
         }
 
-        const token = generateToken({ id: usuario.dfid_cliente });
+        const token = generateToken({ id: usuario.dfid_cliente ,role: usuario.dfuser_role});
         res.status(200).send({ token });
 
     } catch (error: any) {
@@ -161,7 +163,7 @@ app.post('/clientes/login', async (req: Request, res: Response) => {
 app.post('/clientes',async (req:Request,res:Response)=>{
     const {nome,telefone,email,senha} = req.body;
 
-    const id = v7(); // usar v7
+    const id = v7();// usar v7
     
     try{
         if(!nome || !telefone || !email || !senha){
@@ -182,14 +184,25 @@ app.post('/clientes',async (req:Request,res:Response)=>{
             res.status(401)
             throw Error("Email ja cadastrado");
         }
+
+        //type para verificar se esta correto os tipos 
+        const novoUsuario : typeUsuario = {
+            id: id,
+            nome : nome,
+            telefone : telefone,
+            email : email,
+            role: userType.USER,
+            senha: hashedPassword
+        } 
         
         await connection('tbcliente')
         .insert({
-            'dfid_cliente':id,
-            'dfnome_cliente':nome,
-            'dftelefone_cliente':telefone,
-            'dfemail_cliente':email,
-            'dfsenha_cliente':hashedPassword
+            'dfid_cliente':novoUsuario.id,
+            'dfnome_cliente':novoUsuario.nome,
+            'dftelefone_cliente':novoUsuario.telefone,
+            'dfemail_cliente':novoUsuario.email,
+            'dfuser_role':novoUsuario.role,
+            'dfsenha_cliente':novoUsuario.senha
         })
         
         res.status(201).send('Cliente cadastrado com sucesso!');
