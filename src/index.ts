@@ -191,7 +191,7 @@ app.post('/clientes',async (req:Request,res:Response)=>{
             nome : nome,
             telefone : telefone,
             email : email,
-            role: userType.ADMIN,
+            role: userType.USER,
             senha: hashedPassword
         } 
         
@@ -304,6 +304,65 @@ app.post('/bebidas',async (req:Request,res:Response)=>{
         res.send(message);
     }
 })
+app.get('/bebidas/:id',async (req:Request,res:Response)=>{
+const {id} = req.params
+
+const tokenData = getTokenData(req.headers.authorization!)
+try{
+    if(!tokenData){
+        res.status(401);
+        throw new Error("Token invalido");
+    }
+    const bebidaExiste = await connection('tbbebidas')
+    .where({'dfid_bebida':id})
+    
+    
+    if(bebidaExiste.length === 0){
+        res.status(404);
+        throw Error("bebida não encontrada");   
+    }
+  const bebidas =   await connection ('tbbebidas').
+    where ({
+        'dfid_bebida': id
+
+    })
+    res.status(201).send(bebidas)
+}catch(error:any){
+    const message = (error.sqlMessage || error.message)
+    res.send(message);
+}
+});
+
+app.delete('/bebidas/:id',async (req:Request,res:Response)=>{
+    const {id} = req.params
+    const tokenData = getTokenData(req.headers.authorization!)
+    try{
+        if(!tokenData){
+            res.status(401);
+            throw new Error("Token invalido");
+        }
+        if(!id){
+            res.status(404)
+            throw new Error("id não encontrado");
+        }
+        const bebidaExiste = await connection('tbbebidas')
+        .where({'dfid_bebida':id})
+        
+        
+        if(bebidaExiste.length === 0){
+            res.status(404);
+            throw Error("bebida não encontrada");   
+        }
+        await connection('tbbebidas')
+        .where({'dfid_bebida':id})
+        .delete()
+        res.status(200).send("Bebida deletada com sucesso")
+    }catch(error:any){
+        const message = (error.sqlMessage || error.message)
+    res.send(message);
+    }
+});
+
 
 app.listen(3003, () => {
     console.log('Vamos Rodar');
