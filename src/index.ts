@@ -191,7 +191,7 @@ app.post('/clientes',async (req:Request,res:Response)=>{
             nome : nome,
             telefone : telefone,
             email : email,
-            role: userType.USER,
+            role: userType.ADMIN,
             senha: hashedPassword
         } 
         
@@ -246,14 +246,62 @@ app.delete('/clientes/:idCliente',async (req:Request,res:Response)=>{
 })
 //Bebidas
 app.get('/bebidas',async (req:Request,res:Response)=>{
+    const {nome} = req.query
     try{
-        const bebidas = await connection('tbcliente');
+        if(nome){
+            const bebidas = await connection('tbbebidas')
+            .where({'dfnome_bebida':nome})
 
-        res.status(200).send(bebidas);
+            if(bebidas.length === 0){
+                res.status(400)
+                throw new Error("Bebida não encontrada!")
+            }
+
+            res.status(200).send(bebidas);
+        }else{
+            const bebidas = await connection('tbbebidas');
+
+            res.status(200).send(bebidas);
+        }
+
 
     }catch(error:any){ 
         const message = (error.sqlMessage || error.message)
         res.send(message)
+    }
+})
+
+app.post('/bebidas',async (req:Request,res:Response)=>{
+    const {nome,descricao,disponivel,preco} = req.body;
+    
+    const tokenData = getTokenData(req.headers.authorization!)
+
+    const id = v7()
+    
+    try{
+        if(!tokenData){
+            res.status(401);
+            throw new Error("Token invalido");
+        }
+
+        if(!nome || !descricao || !disponivel || !preco){
+            res.status(400);
+            throw new Error("Campo faltando!")
+        }
+        
+        await connection('tbbebidas')
+        .insert({
+            'dfid_bebida':id,
+            'dfnome_bebida':nome,
+            'dfdescricao_bebida':descricao,
+            'dfbebida_disponivel':disponivel,
+            'dfpreco':preco
+        })
+        res.status(201).send("Bebida cadastrada com sucesso");
+
+    }catch(error:any){
+        const message = (error.sqlMessage || error.message)
+        res.send(message);
     }
 })
 
