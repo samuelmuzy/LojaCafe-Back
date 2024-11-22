@@ -1,9 +1,13 @@
 import connection from "../connection";
 
-export const buscarClientes = async () => {
+export const buscarClientes = async (nome: string) => {
     try {
-        const user = await connection("tbcliente");
-        return user;
+        const query = connection("tbcliente");
+        if (nome) {
+            query.where('dfnome_cliente', 'like', `%${nome}%`);
+        }
+        const users = await query;
+        return users;
     } catch (error: any) {
         throw new Error(error.sqlMessage || error.message);
     }
@@ -17,16 +21,6 @@ export const buscarEmailCliente = async (email: string) => {
         throw new Error(error.sqlMessage || error.message);
     }
 };
-
-export const buscarNomeCliente = async (nome?: string) =>{
-    try{
-        const nomeUser = await connection("tbcliente")
-        .where('dfnome_cliente','like',`%${nome}%`);
-        return nomeUser
-    }catch(error: any) {
-        throw new Error(error.sqlMessage || error.message);
-    }
-}
 
 export const buscarIdCliente = async (id: string) => {
     try {

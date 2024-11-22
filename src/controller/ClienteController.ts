@@ -8,7 +8,10 @@ import express, { Request,Response } from 'express'
             res.status(201).send(token);
             
         }catch (error: any) {
-            res.status(error.status).send(error.sqlMessage || error.message);
+            const statusCode = error.status || 500; // Padrão para 500 se não for definido
+            const message = error.message || "Erro interno do servidor";
+
+            res.status(statusCode).send(error.sqlMessage || message);
         }
     }
 
@@ -18,7 +21,10 @@ import express, { Request,Response } from 'express'
             const token = await login(email,senha);
             res.json({ token });
         }catch (error: any) {
-            res.status(error.status).send(error.sqlMessage || error.message);
+            const statusCode = error.status || 500; // Padrão para 500 se não for definido
+            const message = error.message || "Erro interno do servidor";
+
+            res.status(statusCode).send(error.sqlMessage || message);
         }
     }
 
@@ -26,11 +32,13 @@ import express, { Request,Response } from 'express'
         const { nome } = req.query;
     
         try {
-    
             const user = await procurarUsuarios(typeof nome === 'string' ? nome : '');
             res.status(200).send(user);
         } catch (error: any) {
-            res.status(error.status).send(error.sqlMessage || error.message);
+            const statusCode = error.status || 500; // Padrão para 500 se não for definido
+            const message = error.message || "Erro interno do servidor";
+
+            res.status(statusCode).send(error.sqlMessage || message);
         }
     };
 
@@ -42,7 +50,10 @@ import express, { Request,Response } from 'express'
             res.status(200).send(user);
             
         }catch (error: any) {
-            res.status(error.status).send(error.sqlMessage || error.message);
+            const statusCode = error.status || 500; // Padrão para 500 se não for definido
+            const message = error.message || "Erro interno do servidor";
+
+            res.status(statusCode).send(error.sqlMessage || message);
         }
     }
 
@@ -55,7 +66,10 @@ import express, { Request,Response } from 'express'
                 const user = await alterarUsuarios(id,token,nome,email,telefone,senha)
                 res.status(200).send(user);
             }catch (error: any) {
-                res.status(error.status).send(error.sqlMessage || error.message);
+                const statusCode = error.status || 500; // Padrão para 500 se não for definido
+                const message = error.message || "Erro interno do servidor";
+    
+                res.status(statusCode).send(error.sqlMessage || message);
             }
     }
 
@@ -67,7 +81,10 @@ import express, { Request,Response } from 'express'
             const user = await excluirCliente(id,token);
             res.status(200).send(user);
         }catch (error: any) {
-            res.status(error.status).send(error.sqlMessage || error.message);
+            const statusCode = error.status || 500; // Padrão para 500 se não for definido
+            const message = error.message || "Erro interno do servidor";
+
+            res.status(statusCode).send(error.sqlMessage || message);
         }
     }
     

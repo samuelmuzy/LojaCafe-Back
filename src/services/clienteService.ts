@@ -1,4 +1,4 @@
-import {buscarClientes, buscarEmailCliente,buscarNomeCliente,cadastrarCliente,buscarIdCliente, deletarCliente, alterarCliente} from "../data/ClientData";
+import {buscarClientes, buscarEmailCliente,cadastrarCliente,buscarIdCliente, deletarCliente, alterarCliente} from "../data/ClientData";
 import { v7 } from "uuid";
 import { generateToken, getTokenData} from "../middlewares/Authenticator";
 import { userType } from "../types/roleUsuario";
@@ -63,20 +63,20 @@ export const login = async (email: string, senha: string) => {
     }
 };
 //get
-export const procurarUsuarios = async (nome?: string) =>{
-    try{
+export const procurarUsuarios = async (nome: string) => {
+    try {
+        const users = await buscarClientes(nome || '');
+     
         if(nome){
-            const users = await buscarNomeCliente(nome);
-            return users
-        }else{
-            const users = await buscarClientes()
-            return users
+            if(users.length === 0){
+                throw { status: 404, message: "Usuario não encontrado!"} 
+            }
         }
-        
-    }catch (error: any) {
-        throw new Error(error.message || "Erro ao realizar o cadastro");
-    } 
-}
+        return users;
+    } catch (error: any) {
+        throw new Error(error.message || "Erro ao buscar usuários");
+    }
+};
 
 export const procurarIdCliente = async (id:string) =>{
     try{
