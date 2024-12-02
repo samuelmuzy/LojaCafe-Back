@@ -10,7 +10,8 @@ import {
     pesquisarPedidosCliente,
     verificarClientePedido,
     verificarIDbebidasPedido,
-    verificarIdPedido
+    verificarIdPedido,
+    alterarPedido
 } from "../data/PedidosData";
 import { VerificarIdBebida, VerificarIdsBebida } from "../data/BebidaData";
 import { buscarIdCliente } from "../data/ClientData";
@@ -210,3 +211,35 @@ export const deletarBebidaPedidoServise = async (idPedido: string, idBebida: str
         throw { status: error.status || 500, message: error.message || "Erro ao remover bebida do pedido" };
     }
 };
+export const modificarPedido = async (idPedido:string,formaPagamento:string,valorPedido:number,dataPedido:Date,token:string) =>{
+    try{
+        const tokenData = getTokenData(token);
+
+        if(!tokenData){
+            throw {status: 404 , message: "Token invalido"}
+        }
+
+        if (!formaPagamento && !valorPedido && !dataPedido) {
+            throw { status: 400, message: "Campos obrigatórios não preenchidos!" };
+        }
+        
+
+        const pedidoExiste = await verificarIdPedido(idPedido);
+        if (!pedidoExiste) {
+            throw { status: 404, message: "Pedido não encontrado!" };
+        }
+
+        const dadosAtualizacao: any = {};
+        
+        if (formaPagamento) dadosAtualizacao.dfforma_pagamento = formaPagamento;
+        if (valorPedido) dadosAtualizacao.dfvalor_pedido = valorPedido;
+        if (dataPedido) dadosAtualizacao.dfdata_pedido = dataPedido;
+
+        await alterarPedido(idPedido,dadosAtualizacao)
+
+        return "pedido atualizado com sucesso."
+    }
+    catch (error: any) {
+        throw { status: error.status || 500, message: error.message || "Erro ao buscar pedidos" };
+    }
+}

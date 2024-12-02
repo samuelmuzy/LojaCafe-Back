@@ -173,5 +173,13 @@ export const deletarBebidaPedido = async (idPedido: string, idBebida:string) =>{
         throw new Error(error.message || error.sqlMessage);
     }
 }
-
+export const alterarPedido = async (idPedido: string, dadosAtualizacao: any) => {
+    try {
+        await connection('tbpedido')
+            .where({ dfid_pedido: idPedido })
+            .update(dadosAtualizacao);
+    } catch (error: any) {
+        throw new Error(error.message || error.sqlMessage);
+    }
+};
 

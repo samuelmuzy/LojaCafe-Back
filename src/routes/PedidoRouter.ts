@@ -1,5 +1,5 @@
 import  express  from "express";
-import { buscarPedidos, buscarPedidosCliente, cadastrarNovaBebidaPedido, cadastrarPedido, deletarBebidaNoPedido, deletarPedidos } from "../controller/PedidosController";
+import { buscarPedidos, buscarPedidosCliente, cadastrarNovaBebidaPedido, cadastrarPedido, deletarBebidaNoPedido, deletarPedidos,atualizarPedido } from "../controller/PedidosController";
 
 export const PedidoRouter = express.Router();
 
@@ -11,3 +11,4 @@ PedidoRouter.get('/buscarTodosPedidos',buscarPedidos);
 
 PedidoRouter.delete('/:idPedido',deletarPedidos);
 PedidoRouter.delete('/deletarbebida/:idPedido/:idBebida', deletarBebidaNoPedido);
+PedidoRouter.put('/:idPedido',atualizarPedido);

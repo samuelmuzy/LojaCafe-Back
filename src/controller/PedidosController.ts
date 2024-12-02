@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { BebidasPedido, buscarTodosPedidos, buscarPedidosPorId, inserirPedidosCliente, deletarPedidoId, deletarBebidaPedidoServise } from "../services/PedidosServise";
-
+import { modificarPedido } from "../services/PedidosServise";
 export const buscarPedidosCliente = async (req:Request , res:Response) =>{
     const {idCliente} = req.params;
     const token  = req.headers.authorization!;
@@ -86,3 +86,19 @@ export const deletarBebidaNoPedido = async (req:Request,res:Response) =>{
         res.status(statusCode).send(error.sqlMessage || message);
     }
 }
+export const atualizarPedido = async (req: Request, res: Response) => {
+    const { formaPagamento, valorPedido, dataPedido } = req.body;
+    const {idPedido} = req.params;
+    const token = req.headers.authorization!;
+    
+    try {
+        // Chama a função de serviço que modifica o pedido
+        const mensagem = await modificarPedido(idPedido, formaPagamento, valorPedido, dataPedido, token);
+        res.status(200).send({ message: mensagem });
+    } catch (error: any) {
+        const statusCode = error.status || 500;
+        const message = error.message || "Erro ao atualizar o pedido";
+        
+        res.status(statusCode).send({ message: error.sqlMessage || message });
+    }
+};
