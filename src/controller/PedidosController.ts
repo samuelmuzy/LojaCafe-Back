@@ -1,10 +1,11 @@
 import { Request,Response } from "express"
-import { buscarPedidos, inserirPedidosCliente } from "../services/PedidosServise";
+import { BebidasPedido, buscarTodosPedidos, buscarPedidosPorId, inserirPedidosCliente, deletarPedidoId, deletarBebidaPedidoServise } from "../services/PedidosServise";
 
 export const buscarPedidosCliente = async (req:Request , res:Response) =>{
     const {idCliente} = req.params;
+    const token  = req.headers.authorization!;
     try{
-        const pedido =  await buscarPedidos(idCliente);
+        const pedido =  await buscarPedidosPorId(idCliente,token);
         res.status(200).send(pedido);
     }catch (error: any) {
         const statusCode = error.status || 500; 
@@ -16,15 +17,72 @@ export const buscarPedidosCliente = async (req:Request , res:Response) =>{
 
 export const cadastrarPedido = async (req:Request, res:Response) =>{
     const { idCliente, formaPagamento, valorPedido, bebidas } = req.body;
+    const token  = req.headers.authorization!;
     const dataAtual = new Date();
 
     try{
-        const pedido = await inserirPedidosCliente(dataAtual,formaPagamento,valorPedido,idCliente,bebidas);
+        const pedido = await inserirPedidosCliente(dataAtual,formaPagamento,valorPedido,idCliente,bebidas,token);
         res.status(200).send(pedido);
     }catch (error: any) {
         const statusCode = error.status || 500; 
         const message = error.message || "Erro interno do servidor";
 
+        res.status(statusCode).send(error.sqlMessage || message);
+    }
+}
+
+export const cadastrarNovaBebidaPedido = async (req:Request, res:Response) => {
+    const { idPedido , bebidas } = req.body;
+    const token  = req.headers.authorization!;
+    
+    try{
+        const produto = await BebidasPedido(idPedido,bebidas,token);
+        res.status(200).send(produto);
+    }catch (error: any) {
+        const statusCode = error.status || 500; 
+        const message = error.message || "Erro interno do servidor";
+
+        res.status(statusCode).send(error.sqlMessage || message);
+    }
+}
+
+export const buscarPedidos = async (req:Request ,res:Response) =>{
+    const token  = req.headers.authorization!;
+    try{
+        const produto = await buscarTodosPedidos(token);
+        res.status(200).send(produto);
+    }catch (error: any) {
+        const statusCode = error.status || 500; 
+        const message = error.message || "Erro interno do servidor";
+
+        res.status(statusCode).send(error.sqlMessage || message);
+    }
+}
+
+export const deletarPedidos = async (req:Request,res:Response) =>{
+    const {idPedido} = req.params
+    const token  = req.headers.authorization!;
+    try{
+        const pedidoDeletado = await deletarPedidoId(idPedido,token);
+        
+        res.status(200).send(pedidoDeletado);
+    }catch (error: any) {
+        const statusCode = error.status || 500; 
+        const message = error.message || "Erro interno do servidor";
+
+        res.status(statusCode).send(error.sqlMessage || message);
+    }
+}
+
+export const deletarBebidaNoPedido = async (req:Request,res:Response) =>{
+    const {idPedido,idBebida} = req.params;
+    const token  = req.headers.authorization!;
+    try{
+        const bebidaDeletada = await deletarBebidaPedidoServise(idPedido,idBebida,token);
+        res.status(200).send(bebidaDeletada);
+    }catch (error: any) {
+        const statusCode = error.status || 500; 
+        const message = error.message || "Erro interno do servidor";
         res.status(statusCode).send(error.sqlMessage || message);
     }
 }

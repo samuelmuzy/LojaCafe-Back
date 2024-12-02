@@ -22,24 +22,20 @@ export const buscarEmailCliente = async (email: string) => {
     }
 };
 
-export const buscarIdCliente = async (id: string) => {
+export const buscarIdCliente = async (idCliente: string) => {
     try {
-        const verificarUsuario = await connection("tbcliente").where({ dfid_cliente: id });
-        
-        if(verificarUsuario.length === 0){
-            return null
-        }
-
+        const verificarUsuario = await connection("tbcliente").where({ dfid_cliente: idCliente });
+    
         return verificarUsuario;
     } catch (error: any) {
         throw new Error(error.sqlMessage || error.message);
     }
 };
 
-export const cadastrarCliente = async (id: string,nome: string,email: string,telefone: string,senha: string,role: string) => {
+export const cadastrarCliente = async (idCliente: string,nome: string,email: string,telefone: string,senha: string,role: string) => {
     try {
         await connection("tbcliente").insert({
-            dfid_cliente: id,
+            dfid_cliente: idCliente,
             dfnome_cliente: nome,
             dftelefone_cliente: telefone,
             dfemail_cliente: email,
@@ -51,20 +47,20 @@ export const cadastrarCliente = async (id: string,nome: string,email: string,tel
     }
 };
 
-export const alterarCliente = async (id: string, dadosAtualizacao: any) => {
+export const alterarCliente = async (idCliente: string, dadosAtualizacao: any) => {
     try {
         await connection("tbcliente")
             .update(dadosAtualizacao)
-            .where({'dfid_cliente': id});
+            .where({'dfid_cliente': idCliente});
     } catch (error: any) {
         throw new Error(error.sqlMessage || error.message);
     }
 }
 
-export const deletarCliente = async (id:string) =>{
+export const deletarCliente = async (idCliente:string) =>{
     try{
         await connection("tbcliente")
-        .where({'dfid_cliente':id})
+        .where({'dfid_cliente':idCliente})
         .delete()
     } catch (error: any) {
         throw new Error(error.sqlMessage || error.message);
