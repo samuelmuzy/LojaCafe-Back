@@ -25,7 +25,7 @@ export const cadastro = async (nome: string, email: string, telefone: string, se
 
         
         const id = v7();
-        const role = userType.ADMIN;
+        const role = userType.USER;
 
         await cadastrarCliente(id, nome, email, telefone, senhaHash, role);
 

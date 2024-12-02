@@ -33,7 +33,7 @@
 
 **Execução**
 
-- Execute o comando npm start no diretório do projeto para iniciar o servidor de desenvolvimento.
+- Execute o comando npm run dev no diretório do projeto para iniciar o servidor de desenvolvimento.
 
 **Documentação**
 - Biblioteca multer para adicionar imagens 
