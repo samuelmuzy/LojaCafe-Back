@@ -1,4 +1,4 @@
-# ![Café_Dev]()
+# Café_Dev
 
 **Café_Dev: A energia que seu backend precisa**
 
@@ -36,7 +36,7 @@
 - Execute o comando npm start no diretório do projeto para iniciar o servidor de desenvolvimento.
 
 **Documentação**
-- Biblioteca multer para adicionar imagens está 
+- Biblioteca multer para adicionar imagens 
 - A documentação pode ser encontrada atraves do link: https://dream-team-1308.postman.co/workspace/Dream-Team-Workspace~0f1c0ee2-17ce-4245-8499-389b38b4adfc/collection/36608312-033c74b8-e6af-4c91-8a08-ed5aeb829175?action=share&creator=36608312
 ## Autores
 
