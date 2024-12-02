@@ -34,6 +34,10 @@ export const exibirBebidas = async (nomeBebida: string, limit: string, page: str
             throw { status: 404, message: "Bebida não encontrada!" };
         }
 
+        if(bebidas.length === 0){
+            throw { status: 404, message: "Sem bebidas!" };
+        }
+
         return bebidas;
     } catch (error: any) {
         throw { status: error.status || 500, message: error.message || "Erro ao buscar bebidas" };
