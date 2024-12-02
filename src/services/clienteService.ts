@@ -25,14 +25,14 @@ export const cadastro = async (nome: string, email: string, telefone: string, se
 
         
         const id = v7();
-        const role = userType.USER;
+        const role = userType.ADMIN;
 
         await cadastrarCliente(id, nome, email, telefone, senhaHash, role);
 
         return "Usuário cadastrado com sucesso" ;  // Retornando status 201 para sucesso
 
     } catch (error: any) {
-       
+
         throw { status: error.status || 500, message: error.message || "Erro ao realizar o cadastro" };
     }
 };
@@ -66,7 +66,7 @@ export const login = async (email: string, senha: string) => {
 export const procurarUsuarios = async (nome: string) => {
     try {
         const users = await buscarClientes(nome || '');
-     
+        
         if(nome){
             if(users.length === 0){
                 throw { status: 404, message: "Usuario não encontrado!"} 
@@ -85,7 +85,7 @@ export const procurarIdCliente = async (id:string) =>{
         }
         const verificarId = await buscarIdCliente(id);
 
-        if(!verificarId){
+        if(verificarId.length === 0){
             throw { status: 404, message: "Id não encontrado!"}
         }
         return verificarId;
@@ -122,7 +122,7 @@ export const alterarUsuarios = async (id: string,token: string,nome: string,emai
 
         if (senha) {
             if (typeof senha !== 'string') {
-                 throw {status: 400 , message:"A senha deve ser uma string."};
+                throw {status: 400 , message:"A senha deve ser uma string."};
             }
             dadosAtualizacao.dfsenha_cliente = await hashPassword(senha);
         }
@@ -136,7 +136,6 @@ export const alterarUsuarios = async (id: string,token: string,nome: string,emai
             throw { status: 409, message: "Email já existe" }; 
         }
         
-      
         await alterarCliente(id,dadosAtualizacao);
 
         return "Usuário alterado com sucesso"
