@@ -25,7 +25,7 @@ export const cadastroBebidas = async (nome:string,descricao:string,preco:number,
 
 export const exibirBebidas = async (nomeBebida: string, limit: string, page: string) => {
     try {
-        const limitValid = limit || "10"; 
+        const limitValid = limit || ""; 
         const offsetValid = page || ""; 
 
         const bebidas = await buscarBebidas(nomeBebida || '', limitValid, offsetValid);
