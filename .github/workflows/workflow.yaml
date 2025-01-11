@@ -1,1 +1,19 @@
-teste
+name: integração
+    
+on:
+    [pull_request,push]
+    
+jobs:
+  novos-teste:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: using nodejs
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20.
+      - name: run install, start and test
+        run: |
+            npm install
+            npm start
+            npm run test 
