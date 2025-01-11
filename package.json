@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "tsc && node ./build/index.js",
+    "build": "tsc",
     "test": "cls && echo \"Running tests...\" && jest",
     "dev": "ts-node-dev ./src/index.ts"
   },
