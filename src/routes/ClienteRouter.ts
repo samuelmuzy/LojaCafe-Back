@@ -1,5 +1,5 @@
-import express from 'express'
-import {alterarCliente, buscarCliente, buscarClientePorId, cadastrar,deletarUsuario,logar} from '../controller/ClienteController'
+import express from 'express';
+import { alterarCliente, buscarCliente, buscarClientePorId, cadastrar,deletarUsuario,logar } from '../controller/ClienteController';
 
 export const ClienteRouter = express.Router();
 

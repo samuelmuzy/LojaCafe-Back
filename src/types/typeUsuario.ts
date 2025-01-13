@@ -1,6 +1,6 @@
-import { userType } from "./roleUsuario"
+import { userType } from './roleUsuario';
 
-export type typeUsuario={
+export interface typeUsuario {
     id:string,
     nome:string,
     email:string,
