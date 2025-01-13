@@ -1,7 +1,12 @@
 name: integração
     
 on:
-    [pull_request,push]
+    push:
+      branches:
+      - main
+    pull_request:
+      branches:
+      - main
     
 jobs:
   novos-teste:
