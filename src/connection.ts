@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const connection = knex({
-  client: 'mysql',
+  client: 'mysql2',
   connection: {
     host: process.env.DB_HOST,
-    port: 3306,
+    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined,
     user: process.env.DB_USER,
     password: process.env.DB_SENHA,
     database: process.env.DB_DATABASE,
