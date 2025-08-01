@@ -32,7 +32,7 @@ export const pesquisarPedidosCliente = async (idCliente: string) => {
       idCliente: pedido.idCliente,
       formaPagamento: pedido.formaPagamento,
       somaTotal: pedido.somaTotal,
-      bebidas: JSON.parse(pedido.bebidas || '[]'),
+      bebidas: typeof pedido.bebidas === 'string' ? JSON.parse(pedido.bebidas) : pedido.bebidas || [],
     }));
 
   }catch(error:any){

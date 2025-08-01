@@ -1,17 +1,25 @@
 import { Request,Response } from 'express';
 import { BebidasPedido, buscarTodosPedidos, buscarPedidosPorId, inserirPedidosCliente, deletarPedidoId, deletarBebidaPedidoServise } from '../services/PedidosServise';
 import { modificarPedido } from '../services/PedidosServise';
+
 export const buscarPedidosCliente = async (req:Request , res:Response) =>{
   const { idCliente } = req.params;
   const token  = req.headers.authorization!;
   try{
-    const pedido =  await buscarPedidosPorId(idCliente,token);
-    res.status(200).send(pedido);
+    console.log(token)
+    const pedido = await buscarPedidosPorId(idCliente,token);
+    res.status(200).json(pedido);
   }catch (error: any) {
-    const statusCode = error.status || 500; 
+    const statusCode = error.status || 500;
     const message = error.message || 'Erro interno do servidor';
-
-    res.status(statusCode).send(error.sqlMessage || message);
+  
+    res.status(statusCode).json({
+      error: {
+        status: statusCode,
+        message: message,
+        sqlMessage: error.sqlMessage || null
+      }
+    });
   }
 };
 
@@ -50,7 +58,7 @@ export const buscarPedidos = async (req:Request ,res:Response) =>{
   const token  = req.headers.authorization!;
   try{
     const produto = await buscarTodosPedidos(token);
-    res.status(200).send(produto);
+    res.status(200).json(produto);
   }catch (error: any) {
     const statusCode = error.status || 500; 
     const message = error.message || 'Erro interno do servidor';
