@@ -1,5 +1,6 @@
 import { alterarBebidaServise, cadastroBebidas,  deletarBebidaNova, exibirBebidas } from '../services/BebidaServise';
 import { Request,Response } from 'express';
+import { uploadImagemBuffer } from '../services/cloudinaryService';
 
 export const cadastroBebida = async (req:Request,res:Response) =>{
   const { nome, descricao, disponivel, preco } = req.body;
@@ -7,7 +8,9 @@ export const cadastroBebida = async (req:Request,res:Response) =>{
   const token  = req.headers.authorization!;
 
   try{
-    const novaBebida = await cadastroBebidas(nome,descricao,preco,disponivel,file?.filename as string,token);
+    if (!file?.buffer) { throw { status: 400, message: 'Imagem é obrigatória' }; }
+    const imageUrl = await uploadImagemBuffer(file.buffer, 'bebidas');
+    const novaBebida = await cadastroBebidas(nome,descricao,preco,disponivel,imageUrl,token);
     res.status(201).send(novaBebida);
   }catch (error: any) {
     const statusCode = error.status || 500; // Padrão para 500 se não for definido
@@ -50,7 +53,11 @@ export const alterarBebidaController = async (req:Request,res:Response) =>{
   const token  = req.headers.authorization!;
   const { idBebida } = req.params;
   try{
-    const bebidaAlterada = await alterarBebidaServise(idBebida,nome,descricao,preco,disponivel,file?.filename as string,token);
+    let imageUrl = '';
+    if (file?.buffer) {
+      imageUrl = await uploadImagemBuffer(file.buffer, 'bebidas');
+    }
+    const bebidaAlterada = await alterarBebidaServise(idBebida,nome,descricao,preco,disponivel,imageUrl,token);
     res.status(200).send(bebidaAlterada);
   }catch (error: any) {
     const statusCode = error.status || 500; // Padrão para 500 se não for definido

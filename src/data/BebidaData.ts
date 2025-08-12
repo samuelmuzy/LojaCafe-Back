@@ -22,7 +22,7 @@ export const somarBebidas = async (idPedido:string) =>{
   }
 };
 
-export const cadastrarNovaBebida = async (idBebida:string,nome:string,descricao:string,preco:number,disponivel:boolean,file:string) =>{
+export const cadastrarNovaBebida = async (idBebida:string,nome:string,descricao:string,preco:number,disponivel:boolean,imageUrl:string) =>{
   try{
     await connection('tbbebidas')
       .insert({ 'dfid_bebida': idBebida,
@@ -30,7 +30,7 @@ export const cadastrarNovaBebida = async (idBebida:string,nome:string,descricao:
         'dfdescricao_bebida': descricao,
         'dfbebida_disponivel': disponivel,
         'dfpreco': preco,
-        'dfcaminho_imagem':`/file/${file}`
+        'dfcaminho_imagem': imageUrl
       });
   }catch (error: any) {
     throw new Error(error.message || error.sqlMessage);

@@ -2,7 +2,7 @@ import { v7 } from 'uuid';
 import { alterarBebida, buscarBebidas, cadastrarNovaBebida, deletarBebidaPorId, VerificarIdBebida } from '../data/BebidaData';
 import { getTokenData } from '../middlewares/Authenticator';
 
-export const cadastroBebidas = async (nome: string, descricao: string, preco: number, disponivel: boolean, file: string, token: string) => {
+export const cadastroBebidas = async (nome: string, descricao: string, preco: number, disponivel: boolean, imageUrl: string, token: string) => {
   try { 
     const idBebida = v7();
 
@@ -12,11 +12,11 @@ export const cadastroBebidas = async (nome: string, descricao: string, preco: nu
       throw { status: 404, message: 'Token invalido' };
     }
 
-    if (!nome || !descricao || !preco || disponivel === undefined || !file) {
+    if (!nome || !descricao || !preco || disponivel === undefined || !imageUrl) {
       throw { status: 400, message: 'Campo faltando' };
     }
 
-    await cadastrarNovaBebida(idBebida, nome, descricao, preco, disponivel, file);
+    await cadastrarNovaBebida(idBebida, nome, descricao, preco, disponivel, imageUrl);
     return 'Bebida cadastrada com sucesso';
   } catch (error: any) {
     throw { status: error.status || 500, message: error.message || 'Erro ao cadastrar bebida' };
@@ -75,7 +75,7 @@ export const alterarBebidaServise = async (
   descricao: string,
   preco: number,
   disponivel: boolean,
-  file: string,
+  imageUrl: string,
   token: string
 ) => {
   try {
@@ -85,7 +85,7 @@ export const alterarBebidaServise = async (
       throw { status: 404, message: 'Token invalido' };
     }
 
-    if (!nome && !descricao && !preco && !disponivel && !file) {
+    if (!nome && !descricao && !preco && !disponivel && !imageUrl) {
       throw { status: 400, message: 'Campo faltando' };
     }
 
@@ -100,7 +100,7 @@ export const alterarBebidaServise = async (
     if (descricao) {dadosAtualizacao.dfdescricao_bebida = descricao;}
     if (preco) {dadosAtualizacao.dfpreco = preco;}
     if (disponivel !== undefined) {dadosAtualizacao.dfbebida_disponivel = disponivel;}
-    if (file) {dadosAtualizacao.dfcaminho_imagem = `/file/${file}`;}
+    if (imageUrl) {dadosAtualizacao.dfcaminho_imagem = imageUrl;}
 
     await alterarBebida(idBebida, dadosAtualizacao);
 

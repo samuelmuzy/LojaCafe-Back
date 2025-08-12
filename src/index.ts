@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { app } from './app';
 import { ClienteRouter } from './routes/ClienteRouter';
 import { BebidaRouter } from './routes/BebidaRouter';
